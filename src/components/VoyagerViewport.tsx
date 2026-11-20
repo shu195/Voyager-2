@@ -277,9 +277,9 @@ function buildPinpointStarfield(): {
   ];
 
   const layers = [
-    { count: 3200, size: 1.4, minR: 98, maxR: 145, opacity: 0.72, beltChance: 0.44 },
-    { count: 520, size: 2.35, minR: 88, maxR: 132, opacity: 0.9, beltChance: 0.34 },
-    { count: 85, size: 3.1, minR: 82, maxR: 118, opacity: 0.96, beltChance: 0.25 },
+    { count: 6400, size: 1.45, minR: 98, maxR: 145, opacity: 0.85, beltChance: 0.46 },
+    { count: 1100, size: 2.35, minR: 88, maxR: 132, opacity: 0.94, beltChance: 0.36 },
+    { count: 180, size: 3.2, minR: 82, maxR: 118, opacity: 0.98, beltChance: 0.28 },
   ];
 
   const geos: THREE.BufferGeometry[] = [];
@@ -367,8 +367,8 @@ function buildPinpointStarfield(): {
   ];
 
   const dustBands = [
-    { count: 340, size: 38, spread: 0.3, minR: 150, maxR: 174, opacity: 0.072, pal: dustPaletteOuter },
-    { count: 260, size: 22, spread: 0.15, minR: 146, maxR: 164, opacity: 0.082, pal: dustPaletteCore },
+    { count: 520, size: 40, spread: 0.32, minR: 150, maxR: 174, opacity: 0.105, pal: dustPaletteOuter },
+    { count: 400, size: 24, spread: 0.16, minR: 146, maxR: 164, opacity: 0.115, pal: dustPaletteCore },
   ];
 
   for (const band of dustBands) {
