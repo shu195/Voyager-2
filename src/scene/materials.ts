@@ -40,17 +40,17 @@ export function createVoyagerMaterials(
   textures: ProceduralTextureSet,
   isSoftwareGl: boolean,
 ): VoyagerMaterialLibrary {
-  // 3.7 m HGA thermal white composite enamel (S13G/LO)
+  // 3.7 m HGA thermal white composite enamel (S13G/LO — satin matte velvet roll-off)
   const hgaDishWhite = new THREE.MeshPhysicalMaterial({
     color: 0xe6ebf0,
     map: textures.hgaColor,
     normalMap: textures.hgaNormal,
-    normalScale: new THREE.Vector2(0.95, 0.95),
+    normalScale: new THREE.Vector2(0.55, 0.55),
     roughnessMap: textures.hgaRough,
-    roughness: 0.58,
-    metalness: 0.06,
-    clearcoat: 0.16,
-    clearcoatRoughness: 0.44,
+    roughness: 0.78,
+    metalness: 0.04,
+    clearcoat: 0.03,
+    clearcoatRoughness: 0.72,
     side: THREE.DoubleSide,
   });
 
@@ -67,18 +67,18 @@ export function createVoyagerMaterials(
     side: THREE.DoubleSide,
   });
 
-  // Authentic 24k amber-gold crinkled NASA Kapton MLI blanket
+  // Authentic 24k amber-gold crinkled NASA Kapton MLI blanket (satin roll-off)
   const kaptonGoldFoil = new THREE.MeshPhysicalMaterial({
     color: 0xe6a82e,
     map: textures.kaptonColor,
     normalMap: textures.kaptonNormal,
-    normalScale: new THREE.Vector2(1.65, 1.65),
+    normalScale: new THREE.Vector2(1.1, 1.1),
     roughnessMap: textures.kaptonRough,
-    roughness: 0.25,
-    metalness: 0.94,
-    clearcoat: 0.34,
-    clearcoatRoughness: 0.24,
-    iridescence: 0.16,
+    roughness: 0.44,
+    metalness: 0.88,
+    clearcoat: 0.12,
+    clearcoatRoughness: 0.48,
+    iridescence: 0.12,
     iridescenceIOR: 1.4,
     side: THREE.DoubleSide,
   });
@@ -97,15 +97,15 @@ export function createVoyagerMaterials(
     side: THREE.DoubleSide,
   });
 
-  // Aluminized Mylar / silver Kapton calibration & thermal shield
+  // Aluminized Mylar / silver Kapton calibration & thermal shield (velvety satin)
   const kaptonSilverFoil = new THREE.MeshPhysicalMaterial({
-    color: 0xc2ccd8,
+    color: 0xb8c3d0,
     normalMap: textures.kaptonNormal,
-    normalScale: new THREE.Vector2(0.65, 0.65),
+    normalScale: new THREE.Vector2(0.45, 0.45),
     roughnessMap: textures.kaptonRough,
-    roughness: 0.34,
-    metalness: 0.9,
-    clearcoat: 0.16,
+    roughness: 0.54,
+    metalness: 0.74,
+    clearcoat: 0.05,
     side: THREE.DoubleSide,
   });
 
