@@ -936,6 +936,73 @@ export function VoyagerViewport({
     sceneHandlesRef.current.model = model;
     sceneHandlesRef.current.applyEnvironment = applyEnvironment;
 
+    // Deterministic 60-second dynamic cinematic choreography hook (?cinematic=1)
+    const cinePosCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(6.4, 3.1, 7.2),      // 0s: Wide interstellar establish
+      new THREE.Vector3(2.8, 3.4, 3.2),      // 9s: Swoop over 3.7m segmented dish & feed horn
+      new THREE.Vector3(3.8, -1.65, 3.2),    // 17s: Low-angle underside dish glide
+      new THREE.Vector3(1.65, 0.22, 1.95),   // 24s: Golden Record hero close-up
+      new THREE.Vector3(-4.6, 0.65, 4.1),    // 32s: MHW-RTG triplet + FLIR Thermal IR reveal
+      new THREE.Vector3(3.8, 0.95, 4.4),     // 40s: Scan Platform kinematics + FOV/RF beam cones
+      new THREE.Vector3(6.2, 3.6, 6.6),      // 50s: High-orbit 16-subsystem exploded disassembly
+      new THREE.Vector3(8.0, 3.9, 8.6),      // 60s: Final pull-back into dense Milky Way
+    ]);
+    const cineTargetCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.0, 0.3, -0.15),
+      new THREE.Vector3(0.0, 1.35, 0.0),
+      new THREE.Vector3(0.0, 0.55, 0.0),
+      new THREE.Vector3(-0.65, 0.08, 0.72),
+      new THREE.Vector3(-1.55, -0.15, 0.15),
+      new THREE.Vector3(1.65, -0.25, -0.15),
+      new THREE.Vector3(0.0, 0.25, 0.0),
+      new THREE.Vector3(0.0, 0.25, -0.15),
+    ]);
+    const emptyDetached = new Set<string>();
+    let lastCineThermal = false;
+
+    (window as unknown as { __voyager2CinematicStep?: (tSec: number) => void }).__voyager2CinematicStep = (
+      tSec: number,
+    ) => {
+      const u = THREE.MathUtils.clamp(tSec / 60, 0, 1);
+      const eu = u * u * (3 - 2 * u);
+      cinePosCurve.getPoint(eu, camera.position);
+      cineTargetCurve.getPoint(eu, controls.target);
+      camera.lookAt(controls.target);
+
+      // Dynamic beat 1: FLIR Ironbow Thermal IR flash over MHW-RTG sweep (27s -> 35s)
+      const isThermal = tSec >= 27 && tSec <= 35;
+      if (isThermal !== lastCineThermal) {
+        lastCineThermal = isThermal;
+        model.setThermalMode(isThermal);
+        applyEnvironment('space', 1.0, isThermal);
+      }
+
+      // Dynamic beat 2: Volumetric FOV & X-Band RF Beam Cones over Scan Platform (36s -> 44s)
+      const showCones = !isThermal && tSec >= 36 && tSec <= 44;
+
+      // Dynamic beat 3: 16-Subsystem Structural Disassembly Orbit (45s -> 57s)
+      let explodeVal = 0;
+      if (tSec > 45 && tSec < 57) {
+        const phase = (tSec - 45) / 12;
+        explodeVal = Math.sin(phase * Math.PI) * 0.68;
+      }
+
+      model.updateKinematics(1 / 30, tSec, explodeVal, emptyDetached, {
+        liveMotion: true,
+        scanAutoSweep: true,
+        scanAzimuthDeg: Math.sin(tSec * 0.7) * 35,
+        scanElevationDeg: Math.cos(tSec * 0.5) * 18,
+        showFovCones: showCones,
+        thermalMode: isThermal,
+      });
+
+      if (composer && !isSoftwareGl && !isThermal) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
+    };
+
     if (!isSoftwareGl) {
       renderer.compile(scene, camera);
     }

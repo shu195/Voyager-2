@@ -14,6 +14,9 @@ import {
 } from './data/voyagerCatalog';
 
 export default function App() {
+  const isCinematic =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('cinematic') === '1';
   const [globalExplode, setGlobalExplode] = useState<number>(0);
   const [detachedIds, setDetachedIds] = useState<Set<string>>(() => new Set());
   const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
@@ -187,8 +190,10 @@ export default function App() {
         onHoverChange={setHoverInfo}
       />
 
-      {/* Minimal Top-Left Identity Lockup (Clean unboxed typography, zero pill clutter) */}
-      <header className="fixed top-5 left-6 z-20 pointer-events-none select-none">
+      {!isCinematic && (
+        <>
+          {/* Minimal Top-Left Identity Lockup (Clean unboxed typography, zero pill clutter) */}
+          <header className="fixed top-5 left-6 z-20 pointer-events-none select-none">
         <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-slate-100 leading-none">
           Voyager 2
         </h1>
@@ -327,6 +332,8 @@ export default function App() {
         onToggleHud={() => setHudCollapsed((v) => !v)}
         onToggleDossier={() => setDossierOpen((v) => !v)}
       />
+        </>
+      )}
     </main>
   );
 }
