@@ -192,16 +192,16 @@ function buildCalibratedHdrEnvironments(renderer: THREE.WebGLRenderer) {
     [0.001, 0.002, 0.005],
     [0.0005, 0.001, 0.002],
     [
-      // Focused solar key specular highlight (aligned with solar keyLight)
-      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.94, 0.84], intensity: 9.2, sharpness: 96 },
-      // Tight solar corona shoulder for crisp brushed-metal & Kapton sheen
-      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.91, 0.78], intensity: 1.45, sharpness: 18 },
-      // Crisp interstellar galactic sapphire rim strip
-      { dir: [-7.0, 9.0, -11.5], color: [0.48, 0.76, 1.0], intensity: 2.6, sharpness: 18, softboxAspect: 3.4 },
+      // Focused solar key specular highlight (controlled so grazing faces never blow out)
+      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.94, 0.84], intensity: 3.6, sharpness: 64 },
+      // Tight solar corona shoulder for subtle brushed-metal & Kapton sheen
+      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.91, 0.78], intensity: 0.75, sharpness: 16 },
+      // Subtle interstellar sapphire rim strip
+      { dir: [-7.0, 9.0, -11.5], color: [0.48, 0.74, 1.0], intensity: 1.35, sharpness: 18, softboxAspect: 3.2 },
       // Whisper-subtle cool space edge on shadow flank
-      { dir: [-12.0, -2.5, 5.0], color: [0.32, 0.56, 0.92], intensity: 0.32, sharpness: 10 },
-      // Subtle warm dish-scatter bounce from below
-      { dir: [4.5, -8.0, 7.5], color: [1.0, 0.86, 0.68], intensity: 0.24, sharpness: 12 },
+      { dir: [-12.0, -2.5, 5.0], color: [0.28, 0.48, 0.82], intensity: 0.18, sharpness: 10 },
+      // Minimal warm dish-scatter bounce from below
+      { dir: [4.5, -8.0, 7.5], color: [1.0, 0.86, 0.68], intensity: 0.12, sharpness: 12 },
     ],
   );
   const spaceEnv = pmrem.fromEquirectangular(spaceHdrRaw);
@@ -767,9 +767,9 @@ export function VoyagerViewport({
       composer.addPass(
         new UnrealBloomPass(
           new THREE.Vector2(initW, initH),
-          0.14, // subtle physical bloom strength
-          0.28, // crisp optical halo radius
-          1.22, // selective threshold so only hot solar glints & emissives bloom
+          0.07, // restrained optical bloom strength
+          0.18, // tight halo radius
+          1.85, // high threshold so grazing metallic reflections never blow out
         ),
       );
       composer.addPass(new OutputPass());
@@ -879,20 +879,20 @@ export function VoyagerViewport({
         scene.background = spaceBgColor;
         scene.fog = null;
         scene.environment = envMaps.spaceTexture;
-        scene.environmentIntensity = 0.72;
-        renderer.toneMappingExposure = 1.04;
+        scene.environmentIntensity = 0.42;
+        renderer.toneMappingExposure = 0.94;
         starfield.group.visible = true;
         cadFloor.group.visible = false;
 
         keyLight.color.setHex(0xfff4e2);
-        keyLight.intensity = 3.25;
+        keyLight.intensity = 2.35;
         keyLight.position.set(11.5, 8.2, 9.5);
-        hemiLight.intensity = 0.14;
-        bounceLight.intensity = 0.12;
-        fillLight.intensity = 0.14;
+        hemiLight.intensity = 0.08;
+        bounceLight.intensity = 0.06;
+        fillLight.intensity = 0.08;
         rimLight.color.setHex(0x5bb2ff);
         rimLight.position.set(-11.0, -3.2, -9.5);
-        rimLight.intensity = 2.15;
+        rimLight.intensity = 1.15;
         if (studioSoftboxKey) studioSoftboxKey.visible = false;
         if (studioSoftboxFill) studioSoftboxFill.visible = false;
       } else {
