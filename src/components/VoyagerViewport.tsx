@@ -192,16 +192,16 @@ function buildCalibratedHdrEnvironments(renderer: THREE.WebGLRenderer) {
     [0.001, 0.002, 0.005],
     [0.0005, 0.001, 0.002],
     [
-      // Focused solar key specular highlight (controlled so grazing faces never blow out)
-      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.94, 0.84], intensity: 3.6, sharpness: 64 },
-      // Tight solar corona shoulder for subtle brushed-metal & Kapton sheen
-      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.91, 0.78], intensity: 0.75, sharpness: 16 },
-      // Subtle interstellar sapphire rim strip
-      { dir: [-7.0, 9.0, -11.5], color: [0.48, 0.74, 1.0], intensity: 1.35, sharpness: 18, softboxAspect: 3.2 },
-      // Whisper-subtle cool space edge on shadow flank
-      { dir: [-12.0, -2.5, 5.0], color: [0.28, 0.48, 0.82], intensity: 0.18, sharpness: 10 },
-      // Minimal warm dish-scatter bounce from below
-      { dir: [4.5, -8.0, 7.5], color: [1.0, 0.86, 0.68], intensity: 0.12, sharpness: 12 },
+      // Smooth, broad solar key specular roll-off (no harsh pinpoint hotspots)
+      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.94, 0.85], intensity: 2.6, sharpness: 18 },
+      // Soft solar corona shoulder for silky metallic transitions
+      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.92, 0.8], intensity: 0.85, sharpness: 6 },
+      // Smooth interstellar sapphire rim gradient
+      { dir: [-7.0, 9.0, -11.5], color: [0.52, 0.76, 1.0], intensity: 1.35, sharpness: 8, softboxAspect: 3.4 },
+      // Gentle cool space wrap on shadow flank
+      { dir: [-12.0, -2.5, 5.0], color: [0.34, 0.52, 0.84], intensity: 0.28, sharpness: 5 },
+      // Soft warm dish-scatter bounce from below
+      { dir: [4.5, -8.0, 7.5], color: [1.0, 0.88, 0.72], intensity: 0.22, sharpness: 6 },
     ],
   );
   const spaceEnv = pmrem.fromEquirectangular(spaceHdrRaw);
@@ -879,20 +879,20 @@ export function VoyagerViewport({
         scene.background = spaceBgColor;
         scene.fog = null;
         scene.environment = envMaps.spaceTexture;
-        scene.environmentIntensity = 0.42;
-        renderer.toneMappingExposure = 0.94;
+        scene.environmentIntensity = 0.56;
+        renderer.toneMappingExposure = 1.0;
         starfield.group.visible = true;
         cadFloor.group.visible = false;
 
         keyLight.color.setHex(0xfff4e2);
-        keyLight.intensity = 2.35;
+        keyLight.intensity = 2.65;
         keyLight.position.set(11.5, 8.2, 9.5);
-        hemiLight.intensity = 0.08;
-        bounceLight.intensity = 0.06;
-        fillLight.intensity = 0.08;
-        rimLight.color.setHex(0x5bb2ff);
+        hemiLight.intensity = 0.16;
+        bounceLight.intensity = 0.14;
+        fillLight.intensity = 0.16;
+        rimLight.color.setHex(0x64b5ff);
         rimLight.position.set(-11.0, -3.2, -9.5);
-        rimLight.intensity = 1.15;
+        rimLight.intensity = 1.35;
         if (studioSoftboxKey) studioSoftboxKey.visible = false;
         if (studioSoftboxFill) studioSoftboxFill.visible = false;
       } else {
