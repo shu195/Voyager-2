@@ -992,7 +992,9 @@ export function VoyagerViewport({
         scanAutoSweep: true,
         scanAzimuthDeg: Math.sin(tSec * 0.7) * 35,
         scanElevationDeg: Math.cos(tSec * 0.5) * 18,
+        rcsPulseNonce: 0,
         showFovCones: showCones,
+        selectedPartId: null,
       });
 
       if (composer && !isSoftwareGl && !isThermal) {
