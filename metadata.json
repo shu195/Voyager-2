@@ -1,0 +1,6 @@
+{
+  "name": "Voyager 2 Scientific 3D Visualizer",
+  "description": "Interactive 3D scientific visualization and structural disassembly model of NASA's Voyager 2 interstellar probe with accurate instrumentation, high-resolution procedural textures, detachable subsystems, and color-coded internal wiring harnesses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
