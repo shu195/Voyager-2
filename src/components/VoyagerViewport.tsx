@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import {
   CAMERA_PRESETS,
   EnvironmentMode,
@@ -753,6 +757,24 @@ export function VoyagerViewport({
     const camera = new THREE.PerspectiveCamera(40, initW / initH, 0.06, 260);
     camera.position.set(...CAMERA_PRESETS[0].position);
 
+    // GPU-only Selective Specular Bloom Post-Processing (matches V1 cinema glow)
+    let composer: EffectComposer | null = null;
+    if (!isSoftwareGl) {
+      composer = new EffectComposer(renderer);
+      composer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      composer.setSize(initW, initH);
+      composer.addPass(new RenderPass(scene, camera));
+      composer.addPass(
+        new UnrealBloomPass(
+          new THREE.Vector2(initW, initH),
+          0.14, // subtle physical bloom strength
+          0.28, // crisp optical halo radius
+          1.22, // selective threshold so only hot solar glints & emissives bloom
+        ),
+      );
+      composer.addPass(new OutputPass());
+    }
+
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(...CAMERA_PRESETS[0].target);
     controls.enableDamping = !isSoftwareGl;
@@ -857,18 +879,20 @@ export function VoyagerViewport({
         scene.background = spaceBgColor;
         scene.fog = null;
         scene.environment = envMaps.spaceTexture;
-        scene.environmentIntensity = 0.85;
-        renderer.toneMappingExposure = 1.02;
+        scene.environmentIntensity = 0.72;
+        renderer.toneMappingExposure = 1.04;
         starfield.group.visible = true;
         cadFloor.group.visible = false;
 
         keyLight.color.setHex(0xfff4e2);
-        keyLight.intensity = 2.65;
+        keyLight.intensity = 3.25;
         keyLight.position.set(11.5, 8.2, 9.5);
-        hemiLight.intensity = 0.24;
-        bounceLight.intensity = 0.4;
-        fillLight.intensity = 0.34;
-        rimLight.intensity = 1.2;
+        hemiLight.intensity = 0.14;
+        bounceLight.intensity = 0.12;
+        fillLight.intensity = 0.14;
+        rimLight.color.setHex(0x5bb2ff);
+        rimLight.position.set(-11.0, -3.2, -9.5);
+        rimLight.intensity = 2.15;
         if (studioSoftboxKey) studioSoftboxKey.visible = false;
         if (studioSoftboxFill) studioSoftboxFill.visible = false;
       } else {
@@ -1082,7 +1106,11 @@ export function VoyagerViewport({
         kinematicsRef.current,
       );
 
-      renderer.render(scene, camera);
+      if (composer && !isSoftwareGl && !stateRef.current.thermalMode) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
 
       if (isSoftwareGl) {
         afterDraw(tick);
@@ -1107,6 +1135,9 @@ export function VoyagerViewport({
       domEl.removeEventListener('webglcontextlost', onContextLost);
       domEl.removeEventListener('webglcontextrestored', onContextRestored);
 
+      if (composer) {
+        composer.dispose();
+      }
       controls.dispose();
       model.dispose();
       materials.dispose();
