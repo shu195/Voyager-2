@@ -936,26 +936,29 @@ export function VoyagerViewport({
     sceneHandlesRef.current.model = model;
     sceneHandlesRef.current.applyEnvironment = applyEnvironment;
 
-    // Clean 60-second diagonal 360-degree orbital flyaround at constant 1x speed (?cinematic=1)
+    // Clean 60-second tilted diagonal 360-degree orbit at constant 1x speed (?cinematic=1)
+    // Hardware is fully frozen: elapsed pinned to 0, no live motion, no auto-sweep, no pulses.
+    const isCinematicCapture =
+      new URLSearchParams(window.location.search).get('cinematic') === '1';
     const emptyDetached = new Set<string>();
+    const orbitTiltRad = THREE.MathUtils.degToRad(56); // previous ~21 deg + 35 deg extra tilt
+    const orbitRadius = 8.4;
     (window as unknown as { __voyager2CinematicStep?: (tSec: number) => void }).__voyager2CinematicStep = (
       tSec: number,
     ) => {
       const u = THREE.MathUtils.clamp(tSec / 60, 0, 1);
       const theta = u * Math.PI * 2 + Math.PI * 0.22;
-      const radius = 8.4;
-      const diagY = 0.45 + Math.sin(theta) * 3.0;
-      const horizR = Math.sqrt(Math.max(16, radius * radius - (diagY - 0.45) * (diagY - 0.45)));
 
+      // Circle lying in a plane inclined about the X axis -> diagonal sweep from below to above
       camera.position.set(
-        Math.cos(theta) * horizR,
-        diagY,
-        Math.sin(theta) * horizR,
+        Math.cos(theta) * orbitRadius,
+        Math.sin(theta) * Math.sin(orbitTiltRad) * orbitRadius + 0.35,
+        Math.sin(theta) * Math.cos(orbitTiltRad) * orbitRadius,
       );
       controls.target.set(0, 0.25, 0);
       camera.lookAt(controls.target);
 
-      model.updateKinematics(1 / 30, tSec, 0, emptyDetached, {
+      model.updateKinematics(0, 0, 0, emptyDetached, {
         liveMotion: false,
         scanAutoSweep: false,
         scanAzimuthDeg: 18,
@@ -1104,6 +1107,17 @@ export function VoyagerViewport({
 
     function tick() {
       if (disposed) return;
+
+      // Cinematic capture mode: the deterministic step hook owns camera + hardware.
+      // The live loop must not run kinematics/controls or instruments keep moving.
+      if (isCinematicCapture) {
+        if (isSoftwareGl) {
+          afterDraw(tick);
+        } else {
+          frameId = requestAnimationFrame(tick);
+        }
+        return;
+      }
 
       const now = performance.now();
       const delta = Math.min((now - lastTime) / 1000, 0.1);
