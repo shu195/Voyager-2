@@ -993,7 +993,6 @@ export function VoyagerViewport({
         scanAzimuthDeg: Math.sin(tSec * 0.7) * 35,
         scanElevationDeg: Math.cos(tSec * 0.5) * 18,
         showFovCones: showCones,
-        thermalMode: isThermal,
       });
 
       if (composer && !isSoftwareGl && !isThermal) {
