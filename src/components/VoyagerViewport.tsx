@@ -936,24 +936,53 @@ export function VoyagerViewport({
     sceneHandlesRef.current.model = model;
     sceneHandlesRef.current.applyEnvironment = applyEnvironment;
 
-    // Clean 60-second tilted diagonal 360-degree orbit at constant 1x speed (?cinematic=1)
+    // Clean 60-second tilted ELLIPTICAL orbit at constant 1x arc-length speed (?cinematic=1)
     // Hardware is fully frozen: elapsed pinned to 0, no live motion, no auto-sweep, no pulses.
     const isCinematicCapture =
       new URLSearchParams(window.location.search).get('cinematic') === '1';
     const emptyDetached = new Set<string>();
-    const orbitTiltRad = THREE.MathUtils.degToRad(56); // previous ~21 deg + 35 deg extra tilt
-    const orbitRadius = 8.4;
+    const orbitTiltRad = THREE.MathUtils.degToRad(56); // orbit plane inclination
+    const orbitSemiMajor = 10.5; // wide pass
+    const orbitSemiMinor = 6.4; // close pass
+
+    // Arc-length lookup so camera speed along the ellipse is perfectly constant
+    const ARC_N = 2048;
+    const arcLen = new Float32Array(ARC_N + 1);
+    for (let i = 1; i <= ARC_N; i++) {
+      const p0 = ((i - 1) / ARC_N) * Math.PI * 2;
+      const p1 = (i / ARC_N) * Math.PI * 2;
+      const dx = orbitSemiMajor * (Math.cos(p1) - Math.cos(p0));
+      const dy = orbitSemiMinor * (Math.sin(p1) - Math.sin(p0));
+      arcLen[i] = arcLen[i - 1] + Math.hypot(dx, dy);
+    }
+    const arcTotal = arcLen[ARC_N];
+    const phaseForFraction = (f: number): number => {
+      const target = f * arcTotal;
+      let lo = 0;
+      let hi = ARC_N;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (arcLen[mid] < target) lo = mid;
+        else hi = mid;
+      }
+      const seg = arcLen[hi] - arcLen[lo] || 1;
+      const t = (target - arcLen[lo]) / seg;
+      return ((lo + t) / ARC_N) * Math.PI * 2;
+    };
+
     (window as unknown as { __voyager2CinematicStep?: (tSec: number) => void }).__voyager2CinematicStep = (
       tSec: number,
     ) => {
       const u = THREE.MathUtils.clamp(tSec / 60, 0, 1);
-      const theta = u * Math.PI * 2 + Math.PI * 0.22;
+      const phi = phaseForFraction(u);
 
-      // Circle lying in a plane inclined about the X axis -> diagonal sweep from below to above
+      // Ellipse lying in a plane inclined about the X axis -> diagonal sweep from below to above
+      const ex = Math.cos(phi) * orbitSemiMajor;
+      const ey = Math.sin(phi) * orbitSemiMinor;
       camera.position.set(
-        Math.cos(theta) * orbitRadius,
-        Math.sin(theta) * Math.sin(orbitTiltRad) * orbitRadius + 0.35,
-        Math.sin(theta) * Math.cos(orbitTiltRad) * orbitRadius,
+        ex,
+        ey * Math.sin(orbitTiltRad) + 0.35,
+        ey * Math.cos(orbitTiltRad),
       );
       controls.target.set(0, 0.25, 0);
       camera.lookAt(controls.target);
