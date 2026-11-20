@@ -141,7 +141,7 @@ export function ControlDock({
       {/* Main Unified Solid Dock — Precision Grey & White Theme (Zero backdrop-filter over WebGL) */}
       <div className="pointer-events-auto bg-[#F4F5F7]/95 border border-neutral-300/90 rounded-xl px-3.5 py-2.5 shadow-[0_14px_38px_rgba(0,0,0,0.45)] text-neutral-800">
         {/* Row 1: Disassembly Slider, Wiring Bus Filter, Signal Trace, Environment, Thermal IR, Dossier */}
-        <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-x-2 gap-y-2 pb-2 border-b border-neutral-300/80">
+        <div className="flex flex-wrap 2xl:flex-nowrap items-center justify-between gap-x-2 gap-y-2 pb-2 border-b border-neutral-300/80">
           {/* Global Exploded-View Slider + Actions */}
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="flex items-center gap-1 text-xs font-medium text-neutral-700 whitespace-nowrap shrink-0">
@@ -484,8 +484,8 @@ export function ControlDock({
         )}
 
         {/* Row 2: Camera Focus Presets + Scientific FOV/Beams & Kinematics Toggles */}
-        <div className="flex items-center justify-between gap-2 pt-2 overflow-x-auto">
-          <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 pt-2">
+          <div className="flex flex-wrap items-center gap-1">
             <span className="text-xs font-medium text-neutral-500 mr-1 whitespace-nowrap shrink-0">
               Camera Focus
             </span>
