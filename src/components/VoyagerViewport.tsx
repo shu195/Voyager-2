@@ -179,25 +179,25 @@ function buildCalibratedHdrEnvironments(renderer: THREE.WebGLRenderer) {
   const pmrem = new THREE.PMREMGenerator(renderer);
   pmrem.compileEquirectangularShader();
 
-  // Deep Space HDRI: obsidian cosmos with concentrated 5600K solar specular core,
-  // cold interstellar sapphire rim, and subtle warm HGA scatter bounce
+  // Deep Space HDRI: true obsidian vacuum with razor-sharp 5600K solar specular core
+  // and crisp interstellar sapphire rim strip for high-contrast metallic reflections
   const spaceHdrRaw = generateHdrEquirectangularTexture(
     512,
     256,
-    [0.012, 0.02, 0.042],
-    [0.008, 0.013, 0.024],
-    [0.005, 0.007, 0.012],
+    [0.002, 0.004, 0.01],
+    [0.001, 0.002, 0.005],
+    [0.0005, 0.001, 0.002],
     [
       // Focused solar key specular highlight (aligned with solar keyLight)
-      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.94, 0.84], intensity: 5.2, sharpness: 64 },
-      // Soft solar corona shoulder for realistic metallic sheen transition
-      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.91, 0.78], intensity: 1.35, sharpness: 10 },
-      // Interstellar galactic sapphire rim strip
-      { dir: [-7.0, 9.0, -11.5], color: [0.55, 0.76, 1.0], intensity: 1.65, sharpness: 14, softboxAspect: 3.2 },
-      // Subtle cool space fill on shadow flank
-      { dir: [-12.0, -2.5, 5.0], color: [0.36, 0.54, 0.86], intensity: 0.42, sharpness: 6 },
+      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.94, 0.84], intensity: 9.2, sharpness: 96 },
+      // Tight solar corona shoulder for crisp brushed-metal & Kapton sheen
+      { dir: [11.5, 8.2, 9.5], color: [1.0, 0.91, 0.78], intensity: 1.45, sharpness: 18 },
+      // Crisp interstellar galactic sapphire rim strip
+      { dir: [-7.0, 9.0, -11.5], color: [0.48, 0.76, 1.0], intensity: 2.6, sharpness: 18, softboxAspect: 3.4 },
+      // Whisper-subtle cool space edge on shadow flank
+      { dir: [-12.0, -2.5, 5.0], color: [0.32, 0.56, 0.92], intensity: 0.32, sharpness: 10 },
       // Subtle warm dish-scatter bounce from below
-      { dir: [4.5, -8.0, 7.5], color: [1.0, 0.86, 0.68], intensity: 0.48, sharpness: 8 },
+      { dir: [4.5, -8.0, 7.5], color: [1.0, 0.86, 0.68], intensity: 0.24, sharpness: 12 },
     ],
   );
   const spaceEnv = pmrem.fromEquirectangular(spaceHdrRaw);
@@ -1127,6 +1127,15 @@ export function VoyagerViewport({
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div ref={mountRef} className="w-full h-full" />
+      {environmentMode === 'deep-space' && !thermalMode && (
+        <div
+          className="pointer-events-none absolute inset-0 z-[5]"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, transparent 58%, rgba(2, 4, 10, 0.54) 100%)',
+          }}
+        />
+      )}
       {webglError && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#060911] p-8">
           <div className="max-w-md border border-[#223047] bg-[#0B101B] p-6 text-slate-200">
