@@ -1127,7 +1127,7 @@ export function VoyagerViewport({
   return (
     <div className="relative w-full h-full overflow-hidden">
       <div ref={mountRef} className="w-full h-full" />
-      {environmentMode === 'deep-space' && !thermalMode && (
+      {environmentMode === 'space' && !thermalMode && (
         <div
           className="pointer-events-none absolute inset-0 z-[5]"
           style={{
